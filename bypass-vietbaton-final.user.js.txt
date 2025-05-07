@@ -1,0 +1,137 @@
+// ==UserScript== // @name         Bypass by Vietbaton // @namespace    http://tampermonkey.net/ // @version      1.0 // @description  Bypass tool for yeumoney.com with auto OCR, delay, and UI // @author       Vietbaton // @match        ://yeumoney.com/ // @grant        none // ==/UserScript==
+
+(function() { 'use strict';
+
+// Load settings from localStorage or defaults
+const settings = JSON.parse(localStorage.getItem('bypassSettings') || '{}');
+settings.ocrUrl = settings.ocrUrl || 'https://bet88ho.com/';
+settings.delay = settings.delay || 85;
+settings.autoBypass = settings.autoBypass !== false;
+settings.autoFill = settings.autoFill !== false;
+
+const saveSettings = () => {
+    localStorage.setItem('bypassSettings', JSON.stringify(settings));
+};
+
+// Menu container
+const menu = document.createElement('div');
+menu.id = 'menu-container';
+menu.innerHTML = `
+    <div id="waiting-msg">Đợi Bố Tý Sau: <span id="countdown-time">${settings.delay}</span>s!</div>
+    <div id="ocr-link">OCR URL: <a id="ocr-link-value" href="${settings.ocrUrl}" target="_blank">${settings.ocrUrl}</a></div>
+    <div style="margin-top: 10px;">
+        <label><input type="checkbox" id="auto-fill" ${settings.autoFill ? 'checked' : ''}/> Auto Nhập & Xác Nhận</label><br>
+        <label><input type="checkbox" id="auto-bypass" ${settings.autoBypass ? 'checked' : ''}/> Auto Bypass</label><br>
+        <input type="text" id="ocr-url" value="${settings.ocrUrl}" placeholder="OCR URL" style="width: 100%; margin-top: 5px;" />
+        <input type="number" id="delay-time" value="${settings.delay}" min="1" style="width: 100%; margin-top: 5px;"/>
+        <button id="bypass-now" style="width: 100%; margin-top: 10px;">Bypass Now</button>
+        <button id="fake-ip" style="width: 100%; margin-top: 5px;">Fake IP</button>
+        <button id="fake-browser" style="width: 100%; margin-top: 5px;">Fake Browser</button>
+        <button id="afk" style="width: 100%; margin-top: 5px;">AFK</button>
+        <button id="change-task" style="width: 100%; margin-top: 5px;">Đổi Nhiệm Vụ</button>
+        <button id="go-facebook" style="width: 100%; margin-top: 5px;">Facebook</button>
+    </div>
+`;
+document.body.appendChild(menu);
+
+// Toggle button
+const toggleBtn = document.createElement('button');
+toggleBtn.id = 'toggle-menu';
+toggleBtn.innerText = '+';
+document.body.appendChild(toggleBtn);
+
+// CSS styles
+const style = document.createElement('style');
+style.textContent = `
+    #toggle-menu {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+        border-radius: 50%;
+        background-color: #00bcd4;
+        color: white;
+        border: none;
+        cursor: pointer;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+    }
+    #toggle-menu:hover {
+        transform: scale(1.1);
+    }
+    #menu-container {
+        position: fixed;
+        top: 10%;
+        right: 10px;
+        width: 320px;
+        background-color: #222;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #000;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-20px);
+        transition: all 0.4s ease;
+    }
+    #menu-container.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+    #waiting-msg { font-weight: bold; margin-bottom: 5px; color: #0ff; }
+    #ocr-link { font-size: 12px; color: #0ff; }
+    #ocr-link a { color: #0ff; text-decoration: none; }
+`;
+document.head.appendChild(style);
+
+// Toggle logic
+toggleBtn.addEventListener('click', () => {
+    menu.classList.toggle('active');
+    toggleBtn.innerText = menu.classList.contains('active') ? '−' : '+';
+});
+
+// Save changes
+document.getElementById('auto-fill').addEventListener('change', e => {
+    settings.autoFill = e.target.checked;
+    saveSettings();
+});
+document.getElementById('auto-bypass').addEventListener('change', e => {
+    settings.autoBypass = e.target.checked;
+    saveSettings();
+});
+document.getElementById('ocr-url').addEventListener('change', e => {
+    settings.ocrUrl = e.target.value;
+    saveSettings();
+    document.getElementById('ocr-link-value').href = e.target.value;
+    document.getElementById('ocr-link-value').innerText = e.target.value;
+});
+document.getElementById('delay-time').addEventListener('change', e => {
+    settings.delay = parseInt(e.target.value);
+    document.getElementById('countdown-time').innerText = settings.delay;
+    saveSettings();
+});
+
+// Countdown
+let secondsLeft = settings.delay;
+const countdownTime = document.getElementById('countdown-time');
+const countdown = setInterval(() => {
+    countdownTime.innerText = secondsLeft;
+    secondsLeft--;
+    if (secondsLeft < 0) clearInterval(countdown);
+}, 1000);
+
+// Dummy logic placeholders (hook your own logic here)
+document.getElementById('bypass-now').addEventListener('click', () => alert('Bypassing...'));
+document.getElementById('fake-ip').addEventListener('click', () => alert('Fake IP activated'));
+document.getElementById('fake-browser').addEventListener('click', () => alert('Fake Browser mode'));
+document.getElementById('afk').addEventListener('click', () => alert('AFK mode on'));
+document.getElementById('change-task').addEventListener('click', () => alert('Đổi nhiệm vụ...'));
+document.getElementById('go-facebook').addEventListener('click', () => window.open('https://www.facebook.com/share/19G8Q8dDAt/', '_blank'));
+
+})();
+
